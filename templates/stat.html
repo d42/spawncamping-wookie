@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/graph.css">
+	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/detail.css">
+	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/legend.css">
+	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/examples/css/lines.css">
+    <title>wojtyla</title>
+    <meta charset="utf-8" />
+        <script src="http://code.shutterstock.com/rickshaw/vendor/d3.v3.js"></script>
+        <script src="http://code.shutterstock.com/rickshaw/rickshaw.js"></script>
+</head>
+<body>
+<div id="chart_container">
+	<div id="chart"></div>
+	<div id="legend_container">
+		<div id="smoother" title="Smoothing"></div>
+		<div id="legend"></div>
+	</div>
+	<div id="slider"></div>
+</div>
+
+<script>
+
+    // set up our data series with 50 random data points
+
+var seriesData = {{points|safe}};
+    // instantiate our graph!
+
+    var graph = new Rickshaw.Graph( {
+        element: document.getElementById("chart"),
+        width: 960,
+        height: 500,
+        renderer: 'line',
+        series: [
+            {
+                color: "#c05020",
+                data: seriesData[0],
+                name: '{{s1_name}}'
+            }, {
+                color: "#30c020",
+                data: seriesData[1],
+                name: '{{s2_name}}'
+            }
+        ]
+    } );
+
+    graph.render();
+
+    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+        graph: graph
+    } );
+
+    var legend = new Rickshaw.Graph.Legend( {
+        graph: graph,
+        element: document.getElementById('legend')
+
+    } );
+
+    var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+        graph: graph,
+        legend: legend
+    } );
+
+    var axes = new Rickshaw.Graph.Axis.Time( {
+        graph: graph
+    } );
+    axes.render();
+
+</script>
+
+<h1> SUCH CORRELATION {{correlation}} WOW </h1>
+
+</body>
+</html>
