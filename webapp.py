@@ -71,7 +71,6 @@ def graph():
     herp, derp = map(extract_kimonoapi, request.form.keys())
     herp, derp = trim(herp, derp)
     cor = correlate(herp, derp)
-    import ipdb; ipdb.set_trace()
     dates = [int(d.strftime('%s')) for d in herp.index]
 
     p1 = [{'x': d, 'y': v} for d, v in zip(dates, list(herp.values))]
