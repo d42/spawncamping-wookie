@@ -5,12 +5,10 @@ from collections import defaultdict
 from functools import wraps
 from itertools import zip_longest
 
-from kimono import KimonoApi, correlate, trim, url1, url2
+from kimono import KimonoApi, correlate, trim
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
-
-s1, s2 = [KimonoApi(url).get_any() for url in [url1, url2]]
 
 all_kimonos = {}
 user_kimonos = defaultdict(set)

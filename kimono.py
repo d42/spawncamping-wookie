@@ -3,7 +3,6 @@ import json
 from random import choice
 from urllib import request
 from datetime import datetime
-from stuff import url1, url2
 
 import pandas
 import matplotlib.pyplot as plt
@@ -62,6 +61,7 @@ def correlate(s1, s2):
 
 
 def main():
+    from stuff import url1, url2
     s1, s2 = [KimonoApi(url).get_any() for url in [url1, url2]]
 
     print(correlate(s1, s2))
