@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block main_body %}
+
+
+
+<form action="{{url_for('graph')}}" method='POST'>
+<table class="table">
+<thead>
+    <tr>
+        {% for (name, span) in headers %}
+        <th colspan="{{span}}">{{name}}</th>
+        {% endfor %}
+    </tr>
+</thead>
+<tr>
+    {% for c in collections %}
+    <th>{{c}}</th>
+    {% endfor %}
+
+</tr>
+{% for row in rows %}
+<tr>
+    {% for column in row %}
+    <td>
+        <label> <input type="checkbox" name="{{column|join('.')}}"/>{{column|last}}</label>
+    </td>
+    {% endfor %}
+</tr>
+{% endfor %}
+<table>
+
+
+<input type="submit" value="Go!" class="btn btn-primary btn-lg"/>
+</form>
+{% endblock %}

@@ -1,23 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/graph.css">
-	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/detail.css">
-	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/src/css/legend.css">
-	<link type="text/css" rel="stylesheet" href="http://code.shutterstock.com/rickshaw/examples/css/lines.css">
-    <title>wojtyla</title>
-    <meta charset="utf-8" />
-        <script src="http://code.shutterstock.com/rickshaw/vendor/d3.v3.js"></script>
-        <script src="http://code.shutterstock.com/rickshaw/rickshaw.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block main_body %}
+<h1> SUCH CORRELATION {{correlation}} WOW </h1>
 <div id="chart_container">
-	<div id="chart"></div>
-	<div id="legend_container">
-		<div id="smoother" title="Smoothing"></div>
-		<div id="legend"></div>
-	</div>
-	<div id="slider"></div>
+    <div id="chart"></div>
+    <div id="legend_container">
+        <div id="smoother" title="Smoothing"></div>
+        <div id="legend"></div>
+    </div>
+    <div id="slider"></div>
 </div>
 
 <script>
@@ -69,7 +60,5 @@ var seriesData = {{points|safe}};
 
 </script>
 
-<h1> SUCH CORRELATION {{correlation}} WOW </h1>
 
-</body>
-</html>
+{% endblock %}

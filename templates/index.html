@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block main_body %}
+
+
+
+<div class="jumbotron">
+    <div class="container-fluid">
+        <div class="main">
+            <h2>herpderpderp</h2>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+<form action="/select" method="post" >
+    <textarea class="form-control" rows="3" name='urls' placeholder="api links, separated with newlines"></textarea>
+    <input type='submit' value='Go!' class="btn btn-primary btn-lg" />
+</form>
+</div>
+
+{% endblock %}
+
