@@ -78,7 +78,7 @@ def graph():
     p2 = [{'x': d, 'y': v} for d, v in zip(dates, list(derp.values))]
     return render_template('stat.html',
                            points=json.dumps([p1, p2]),
-                           correlation=cor, s1_name=s1.name, s2_name=s2.name)
+                           correlation=cor, s1_name=herp.name, s2_name=derp.name)
 
 if __name__ == "__main__":
     app.debug = True
