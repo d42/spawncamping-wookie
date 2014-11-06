@@ -2,7 +2,33 @@
 {% block main_body %}
 
 
+<script>
+selected_properties = [];
 
+propertySelection = function(property) {
+    if (!property.checked) {
+        var index = selected_properties.indexOf(property);
+        selected_properties.splice(index, 1);
+        return;
+    }
+
+    if (selected_properties.length >= 2) {
+     var old_prop = selected_properties.shift();
+     old_prop.checked = false;
+    }
+    selected_properties.push(property);
+}
+
+showValue = function(value) {
+    var label = document.getElementById('range_label');
+    label.innerHTML = ['1 Day', '12 Hours', '1 Hour', '30 Minutes', '15 Minutes'][value];
+};
+
+</script>
+
+
+
+{% if collections %}
 <form action="{{url_for('graph')}}" method='POST'>
 <table class="table">
 <thead>
@@ -22,7 +48,7 @@
 <tr>
     {% for column in row %}
     <td>
-        <label> <input type="checkbox" name="{{column|join('.')}}"/>{{column|last}}</label>
+        <label> <input type="checkbox" name="property_{{column|join('.')}}" onchange="propertySelection(this)"/>{{column|last}}</label>
     </td>
     {% endfor %}
 </tr>
@@ -30,6 +56,26 @@
 <table>
 
 
+<div class='row'>
+    <div class="col-xs-6 col-lg-4">
+        <span>
+            <label for="range_slider">Resolution</label>
+            <input id="range_slider" name="resolution" type="range" min="0" max="4" value="0" step="1" oninput="showValue(this.value)"/>
+            <label id="range_label" for="range_slider">1 Day</label>
+        </span>
+    </div>
+
+    <div class="col-xs-6 col-lg-4">
+        <p>Missing Values </p>
+        <span>
+        <label> Ignore <input type="radio" name="missingvalues" value="ignore" /></label>
+        <label> Mean<input type="radio" name="missingvalues" value="mean" /></label>
+        <label> 0 <input type="radio" name="missingvalues" value="0" /></label>
+        </span>
+    </div>
+</div>
 <input type="submit" value="Go!" class="btn btn-primary btn-lg"/>
 </form>
+
+{% endif %}
 {% endblock %}

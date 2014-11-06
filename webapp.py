@@ -29,21 +29,7 @@ def start():
     return render_template('index.html')
 
 
-@app.route('/select', methods=['POST', 'GET'])
-@assure_session
-def select():
-    s_id = session['session_id']
-
-    if request.method == 'POST':
-        urls = request.form['urls'].split('\n')
-
-        for url in urls:
-            if url not in all_kimonos: all_kimonos[url] = KimonoApi(url)
-            user_kimonos[s_id].add(all_kimonos[url])
-
-
-
-    kimonos = list(user_kimonos[s_id])
+def tabularize(kimonos):
     headers = [(k.name, len(k.collections)) for k in kimonos]
     collections = [cname for k in kimonos for cname in k.collections]
     columns = [
@@ -53,22 +39,47 @@ def select():
     ]
 
     rows = list(zip_longest(*columns))
+    return headers, collections, rows
 
 
-    return render_template('select.html', rows=rows, headers=headers,
-                                          collections=collections)
+@app.route('/select', methods=['POST', 'GET'])
+@assure_session
+def select():
+    s_id = session['session_id']
+
+    if request.method == 'POST':
+        urls = (u for u in request.form['urls'].split('\n') if u)
+
+        selected_kimonos = {url: all_kimonos.get(url, KimonoApi(url))
+                            for url in urls}
+
+        all_kimonos.update(selected_kimonos)
+        user_kimonos[s_id] |= set(selected_kimonos.values())
+
+    headers, collections, rows = tabularize(list(user_kimonos[s_id]))
+
+    return render_template('select.html',
+                           rows=rows,
+                           headers=headers,
+                           collections=collections)
 
 
 @app.route('/graph', methods=['POST'])
 @assure_session
 def graph():
     s_id = session['session_id']
+    properties = [e[len('property_'):] for e in request.form.keys()
+                  if e.startswith('property_')]
+
+    resolutions = ['D', '12H', 'H', '30Min', '15Min']
+    resolution = resolutions[int(request.form['resolution'])]
+
     def extract_kimonoapi(string):
         kname, cname, pname = string.split('.')
         kimono = next(k for k in user_kimonos[s_id] if k.name == kname)
-        return kimono.get_property(cname, pname)
+        return kimono.get_property(cname, pname, resolution)
 
-    herp, derp = map(extract_kimonoapi, request.form.keys())
+    herp, derp = map(extract_kimonoapi, properties)
     herp, derp = trim(herp, derp)
     cor = correlate(herp, derp)
     dates = [int(d.strftime('%s')) for d in herp.index]
