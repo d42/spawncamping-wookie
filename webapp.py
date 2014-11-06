@@ -4,14 +4,21 @@ import os
 from collections import defaultdict
 from functools import wraps
 from itertools import zip_longest
+from urllib import parse
 
 from kimono import KimonoApi, correlate, trim
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, flash
 
 app = Flask(__name__)
+try:
+    import application_settings
+    app.config['SECRET'] = application_settings.secret
+except ImportError:
+        app.config['SECRET'] = os.urandom(64)
 
 all_kimonos = {}
 user_kimonos = defaultdict(set)
+
 
 
 def assure_session(func):
@@ -42,6 +49,18 @@ def tabularize(kimonos):
     return headers, collections, rows
 
 
+
+def kimonos_from_urls(urls):
+    for url in urls:
+        parsed_url = parse.urlparse(url)
+        if parsed_url.netloc != 'kimonolabs.com':
+            flash("{} is not legal kimonolabs.com link!".format(url))
+            continue
+
+        if url not in all_kimonos:
+            all_kimonos[url] = KimonoApi(url)
+        yield all_kimonos[url]
+
 @app.route('/select', methods=['POST', 'GET'])
 @assure_session
 def select():
@@ -49,12 +68,8 @@ def select():
 
     if request.method == 'POST':
         urls = (u for u in request.form['urls'].split('\n') if u)
-
-        selected_kimonos = {url: all_kimonos.get(url, KimonoApi(url))
-                            for url in urls}
-
-        all_kimonos.update(selected_kimonos)
-        user_kimonos[s_id] |= set(selected_kimonos.values())
+        url_kimonos = list(kimonos_from_urls(urls))
+        user_kimonos[s_id] |= set(url_kimonos)
 
     headers, collections, rows = tabularize(list(user_kimonos[s_id]))
 
@@ -62,6 +77,12 @@ def select():
                            rows=rows,
                            headers=headers,
                            collections=collections)
+
+
+@app.route('/discover')
+@assure_session
+def discover():
+    return render_template('discover.html')
 
 
 @app.route('/graph', methods=['POST'])
