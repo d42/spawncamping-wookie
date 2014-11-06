@@ -17,7 +17,7 @@ except ImportError:
         app.config['SECRET'] = os.urandom(64)
 
 import logging
-from logging.handlers import FileHandler
+from logging import FileHandler
 handler = FileHandler("kimono.log")
 app.logger.setLevel(logging.WARNING)
 app.logger.addHandler(handler)
