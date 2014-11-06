@@ -12,9 +12,9 @@ from flask import Flask, render_template, request, session, flash
 app = Flask(__name__)
 try:
     import application_settings
-    app.config['SECRET'] = application_settings.secret
+    app.config['SECRET_KEY'] = application_settings.secret
 except ImportError:
-        app.config['SECRET'] = os.urandom(64)
+        app.config['SECRET_KEY'] = os.urandom(64)
 
 import logging
 from logging import FileHandler
