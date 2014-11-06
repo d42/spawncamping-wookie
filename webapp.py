@@ -53,13 +53,25 @@ def tabularize(kimonos):
 def kimonos_from_urls(urls):
     for url in urls:
         parsed_url = parse.urlparse(url)
-        if parsed_url.netloc != 'kimonolabs.com':
+        if parsed_url.netloc not in ['kimonolabs.com', 'www.kimonolabs.com']:
             flash("{} is not legal kimonolabs.com link!".format(url))
             continue
 
-        if url not in all_kimonos:
-            all_kimonos[url] = KimonoApi(url)
-        yield all_kimonos[url]
+        api_path = parsed_url.path
+        api_key = parse.parse_qs(parsed_url.query).get('apikey', None)
+        if not api_key:
+            flash("{} does not contain api key!".format(url))
+            continue
+        api_key = api_key[0]
+
+        query = parse.urlencode({'apikey': api_key, 'kimseries': 1})
+
+        final_url = parse.urlunparse(['https', 'www.kimonolabs.com', api_path, '', query, ''])
+        import ipdb; ipdb.set_trace()
+
+        if final_url not in all_kimonos:
+            all_kimonos[final_url] = KimonoApi(final_url)
+        yield all_kimonos[final_url]
 
 @app.route('/select', methods=['POST', 'GET'])
 @assure_session

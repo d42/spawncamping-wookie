@@ -24,12 +24,19 @@ showValue = function(value) {
     label.innerHTML = ['1 Day', '12 Hours', '1 Hour', '30 Minutes', '15 Minutes'][value];
 };
 
+validateSubmit = function() {
+    if(selected_properties.length != 2) {
+        alert("You have to compare two properties, that's how it goes.");
+        return false;
+    }
+    return true;
+}
 </script>
 
 
 
 {% if collections %}
-<form action="{{url_for('graph')}}" method='POST'>
+<form action="{{url_for('graph')}}" method='POST' onsubmit='validateSubmit()'>
 <table class="table">
 <thead>
     <tr>
@@ -44,7 +51,6 @@ showValue = function(value) {
     {% endfor %}
 
 </tr>
-
 {% for row in rows %}
 <tr>
     {% for column in row %}
