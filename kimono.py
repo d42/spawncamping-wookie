@@ -8,6 +8,8 @@ import pandas
 import matplotlib.pyplot as plt
 
 
+class PropertyNotFoundException(Exception):
+    pass
 
 class KimonoApi:
     def __init__(self, url):
@@ -23,6 +25,10 @@ class KimonoApi:
                            for c_name in self.collections}
 
     def get_property(self, collection, property, resolution='D'):
+        import ipdb; ipdb.set_trace()
+        if collection not in self.collections or property not in self.properties[collection]:
+            raise PropertyNotFoundException()
+
         entries = self.content['results'][collection][0][property]
         series = self.to_series(entries, resolution)
         series.name = '{}>{}'.format(collection, property)
@@ -40,6 +46,12 @@ class KimonoApi:
 
     @staticmethod
     def to_series(entries, resolution='D', time_format='%Y-%m-%dT%H:%M:%S.%fZ'):
+        def parse_entry(e):
+            if not isinstance(e, dict):
+
+            time = datetime.strptim(e['d'], time_format)
+            value = int(e['v'])
+
         parsed_entries = sorted((datetime.strptime(e['d'], time_format), int(e['v']))
                                 for e in entries)
         times, values = zip(*parsed_entries)

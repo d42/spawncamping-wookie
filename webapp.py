@@ -6,7 +6,7 @@ from functools import wraps
 from itertools import zip_longest
 from urllib import parse
 
-from kimono import KimonoApi, correlate, trim
+from kimono import KimonoApi, correlate, trim, PropertyNotFoundException
 from flask import Flask, render_template, request, session, flash
 
 app = Flask(__name__)
@@ -16,9 +16,14 @@ try:
 except ImportError:
         app.config['SECRET'] = os.urandom(64)
 
+import logging
+from logging.handlers import FileHandler
+handler = FileHandler("kimono.log")
+app.logger.setLevel(logging.WARNING)
+app.logger.addHandler(handler)
+
 all_kimonos = {}
 user_kimonos = defaultdict(set)
-
 
 
 def assure_session(func):
@@ -62,16 +67,18 @@ def kimonos_from_urls(urls):
         if not api_key:
             flash("{} does not contain api key!".format(url))
             continue
+
         api_key = api_key[0]
 
         query = parse.urlencode({'apikey': api_key, 'kimseries': 1})
 
         final_url = parse.urlunparse(['https', 'www.kimonolabs.com', api_path, '', query, ''])
-        import ipdb; ipdb.set_trace()
 
         if final_url not in all_kimonos:
             all_kimonos[final_url] = KimonoApi(final_url)
         yield all_kimonos[final_url]
+
+
 
 @app.route('/select', methods=['POST', 'GET'])
 @assure_session
@@ -110,9 +117,16 @@ def graph():
     def extract_kimonoapi(string):
         kname, cname, pname = string.split('.')
         kimono = next(k for k in user_kimonos[s_id] if k.name == kname)
-        return kimono.get_property(cname, pname, resolution)
+        try:
+            return kimono.get_property(cname, pname, resolution)
+        except TypeError:
+            app.logger.error(kimono.content)
+    try:
+        herp, derp = map(extract_kimonoapi, properties)
+    except PropertyNotFoundException:
+        flash("Something went wrong! property not found!")
+        return start()
 
-    herp, derp = map(extract_kimonoapi, properties)
     herp, derp = trim(herp, derp)
     cor = correlate(herp, derp)
     dates = [int(d.strftime('%s')) for d in herp.index]
