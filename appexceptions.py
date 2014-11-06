@@ -1,0 +1,3 @@
+
+class NotKimonoException(Exception):
+    pass
