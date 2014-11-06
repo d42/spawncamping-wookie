@@ -25,7 +25,6 @@ class KimonoApi:
                            for c_name in self.collections}
 
     def get_property(self, collection, property, resolution='D'):
-        import ipdb; ipdb.set_trace()
         if collection not in self.collections or property not in self.properties[collection]:
             raise PropertyNotFoundException()
 
