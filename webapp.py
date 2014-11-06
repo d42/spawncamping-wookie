@@ -92,6 +92,10 @@ def graph():
                            points=json.dumps([p1, p2]),
                            correlation=cor, s1_name=herp.name, s2_name=derp.name)
 
+if ( app.debug ):
+    from werkzeug.debug import DebuggedApplication
+    app.wsgi_app = DebuggedApplication( app.wsgi_app, True )
+
 if __name__ == "__main__":
     app.debug = True
     app.config['SECRET_KEY'] = 'penis'
