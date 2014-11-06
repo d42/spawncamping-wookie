@@ -46,12 +46,6 @@ class KimonoApi:
 
     @staticmethod
     def to_series(entries, resolution='D', time_format='%Y-%m-%dT%H:%M:%S.%fZ'):
-        def parse_entry(e):
-            if not isinstance(e, dict):
-
-            time = datetime.strptim(e['d'], time_format)
-            value = int(e['v'])
-
         parsed_entries = sorted((datetime.strptime(e['d'], time_format), int(e['v']))
                                 for e in entries)
         times, values = zip(*parsed_entries)
