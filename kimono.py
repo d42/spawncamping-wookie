@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 class PropertyNotFoundException(Exception):
     pass
 
+
 class KimonoApi:
     def __init__(self, url):
         self.url = url

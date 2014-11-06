@@ -1,20 +1,20 @@
 import json
-import os
 
 from collections import defaultdict
-from functools import wraps
-from itertools import zip_longest
-from urllib import parse
 
+from flask import Flask, render_template, request, session, flash, redirect, url_for
+
+from apputils import assure_session, kimonos_from_urls, tabularize
 from kimono import KimonoApi, correlate, trim, PropertyNotFoundException
-from flask import Flask, render_template, request, session, flash
+from caching import cache
 
 app = Flask(__name__)
 try:
     import application_settings
     app.config['SECRET_KEY'] = application_settings.secret
 except ImportError:
-        app.config['SECRET_KEY'] = os.urandom(64)
+    import os
+    app.config['SECRET_KEY'] = os.urandom(64)
 
 import logging
 from logging import FileHandler
@@ -22,62 +22,12 @@ handler = FileHandler("kimono.log")
 app.logger.setLevel(logging.WARNING)
 app.logger.addHandler(handler)
 
-all_kimonos = {}
 user_kimonos = defaultdict(set)
-
-
-def assure_session(func):
-
-    @wraps(func)
-    def inner():
-        if 'session_id' not in session:
-            session['session_id'] = os.urandom(64)
-        return func()
-    return inner
 
 
 @app.route('/')
 def start():
     return render_template('index.html')
-
-
-def tabularize(kimonos):
-    headers = [(k.name, len(k.collections)) for k in kimonos]
-    collections = [cname for k in kimonos for cname in k.collections]
-    columns = [
-            [[k.name, collection, property] for collection, properties in k.properties.items()
-                                                    for property in properties]
-               for k in kimonos
-    ]
-
-    rows = list(zip_longest(*columns))
-    return headers, collections, rows
-
-
-
-def kimonos_from_urls(urls):
-    for url in urls:
-        parsed_url = parse.urlparse(url)
-        if parsed_url.netloc not in ['kimonolabs.com', 'www.kimonolabs.com']:
-            flash("{} is not legal kimonolabs.com link!".format(url))
-            continue
-
-        api_path = parsed_url.path
-        api_key = parse.parse_qs(parsed_url.query).get('apikey', None)
-        if not api_key:
-            flash("{} does not contain api key!".format(url))
-            continue
-
-        api_key = api_key[0]
-
-        query = parse.urlencode({'apikey': api_key, 'kimseries': 1})
-
-        final_url = parse.urlunparse(['https', 'www.kimonolabs.com', api_path, '', query, ''])
-
-        if final_url not in all_kimonos:
-            all_kimonos[final_url] = KimonoApi(final_url)
-        yield all_kimonos[final_url]
-
 
 
 @app.route('/select', methods=['POST', 'GET'])
@@ -104,12 +54,17 @@ def discover():
     return render_template('discover.html')
 
 
-@app.route('/graph', methods=['POST'])
+@app.route('/graph', methods=['POST', 'GET'])
 @assure_session
 def graph():
     s_id = session['session_id']
     properties = [e[len('property_'):] for e in request.form.keys()
                   if e.startswith('property_')]
+
+
+    if len(properties) != 2 or request.method == 'GET':
+        flash("can haz 2 properties")
+        return redirect(url_for('discover'))
 
     resolutions = ['D', '12H', 'H', '30Min', '15Min']
     resolution = resolutions[int(request.form['resolution'])]
