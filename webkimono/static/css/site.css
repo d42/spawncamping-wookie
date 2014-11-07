@@ -5,5 +5,8 @@ body {
 
 .main {
     text-align: center;
+}
 
+.message {
+    padding: 15px;
 }

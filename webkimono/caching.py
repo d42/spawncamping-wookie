@@ -1,5 +1,5 @@
-from kimono import KimonoApi
-from appexceptions import NotKimonoException
+from webkimono.kimono import KimonoApi
+from webkimono.appexceptions import NotKimonoException
 from urllib import parse
 
 

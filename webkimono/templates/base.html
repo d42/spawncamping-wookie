@@ -25,11 +25,14 @@
 </head>
 <body>
 
+
 {% with messages = get_flashed_messages() %}
-  {% if messages %}
+  {%if messages %}
+  <div class="container">
     {% for message in messages %}
-    <p class="bg-danger">{{ message }}</p>
+    <p class="bg-danger message">{{ message }}</p>
     {% endfor %}
+  </div>
   {% endif %}
 {% endwith %}
 

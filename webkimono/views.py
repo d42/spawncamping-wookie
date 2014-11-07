@@ -2,25 +2,13 @@ import json
 
 from collections import defaultdict
 
-from flask import Flask, render_template, request, session, flash, redirect, url_for
+from webkimono import app
+from flask import render_template, request, session, flash, redirect, url_for
 
-from apputils import assure_session, kimonos_from_urls, tabularize
-from kimono import KimonoApi, correlate, trim, PropertyNotFoundException
-from caching import cache
+from webkimono.apputils import assure_session, kimonos_from_urls, tabularize
+from webkimono.kimono import KimonoApi, correlate, trim, PropertyNotFoundException
+from webkimono.caching import cache
 
-app = Flask(__name__)
-try:
-    import application_settings
-    app.config['SECRET_KEY'] = application_settings.secret
-except ImportError:
-    import os
-    app.config['SECRET_KEY'] = os.urandom(64)
-
-import logging
-from logging import FileHandler
-handler = FileHandler("kimono.log")
-app.logger.setLevel(logging.WARNING)
-app.logger.addHandler(handler)
 
 user_kimonos = defaultdict(set)
 
@@ -36,7 +24,7 @@ def select():
     s_id = session['session_id']
 
     if request.method == 'POST':
-        urls = (u for u in request.form['urls'].split('\n') if u)
+        urls = (u for u in request.form['urls'].split('\n') if u.strip())
         url_kimonos = list(kimonos_from_urls(urls))
         user_kimonos[s_id] |= set(url_kimonos)
 

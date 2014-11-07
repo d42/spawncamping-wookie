@@ -6,8 +6,8 @@ from urllib import parse
 
 from flask import session, flash
 
-from caching import cache
-from kimono import KimonoApi
+from webkimono.caching import cache
+from webkimono.kimono import KimonoApi
 def assure_session(func):
 
     @wraps(func)
