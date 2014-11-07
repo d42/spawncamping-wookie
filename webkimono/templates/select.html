@@ -37,33 +37,40 @@ validateSubmit = function() {
 
 {% if collections %}
 <form action="{{url_for('graph')}}" method='POST' onsubmit='return validateSubmit()'>
-<table class="table">
-<thead>
+<fieldset>
+    <legend> Known Properties </legend>
+
+    <table class="table">
+    <thead>
+        <tr>
+            {% for (name, span) in headers %}
+            <th colspan="{{span}}">{{name}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
     <tr>
-        {% for (name, span) in headers %}
-        <th colspan="{{span}}">{{name}}</th>
+        {% for c in collections %}
+        <th>{{c}}</th>
+        {% endfor %}
+
+    </tr>
+    {% for row in rows %}
+    <tr>
+        {% for column in row %}
+        <td>
+            <label> <input type="checkbox" name="property_{{column|join('.')}}" onchange="propertySelection(this)"/>{{column|last}}</label>
+        </td>
         {% endfor %}
     </tr>
-</thead>
-<tr>
-    {% for c in collections %}
-    <th>{{c}}</th>
     {% endfor %}
-
-</tr>
-{% for row in rows %}
-<tr>
-    {% for column in row %}
-    <td>
-        <label> <input type="checkbox" name="property_{{column|join('.')}}" onchange="propertySelection(this)"/>{{column|last}}</label>
-    </td>
-    {% endfor %}
-</tr>
-{% endfor %}
-<table>
+    <table>
+        </fieldset>
 
 
 <div class='row'>
+    <fieldset>
+        <legend>Resampling</legend>
+
     <div class="col-xs-6 col-lg-4">
         <span>
             <label for="range_slider">Resolution</label>
@@ -72,6 +79,26 @@ validateSubmit = function() {
         </span>
     </div>
 
+    <div class="form-group">
+        <label class="col-md-4 control-label" for="resamplingmethods">Resampling Methods</label>
+        <div class="col-md-4">
+
+            <label class="radio-inline" for="resampling0">
+                <input type="radio" name="resamplingmethods" id="resampling0" value="1" checked="checked">
+                man
+            </label>
+
+            <label class="radio-inline" for="resampling1">
+                <input type="radio" name="resamplingmethods" id="resampling1" value="2" checked="checked">
+                max
+            </label>
+
+            <label class="radio-inline" for="resampling2">
+                <input type="radio" name="resamplingmethods" id="resampling2" value="3" checked="checked">
+                sum
+            </label>
+
+        </div>
     <div class="col-xs-6 col-lg-4">
         <p>Missing Values </p>
         <span>
@@ -80,6 +107,7 @@ validateSubmit = function() {
         <label> Ignore <input type="radio" name="missingvalues" value="ignore" /></label>
         </span>
     </div>
+    </fieldset>
 </div>
 <input type="submit" value="Go!" class="btn btn-primary btn-lg"/>
 </form>

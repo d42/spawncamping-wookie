@@ -16,9 +16,9 @@ class KimonoApi:
     def __init__(self, url):
         self.url = url
         self.content = self.fetch(self.url)
-        self.read_meta(self.content)
+        self._read_meta(self.content)
 
-    def read_meta(self, content):
+    def _read_meta(self, content):
         self.name = content['name']
         self.count = content['count']
         self.collections = list(content['results'].keys())
@@ -35,10 +35,10 @@ class KimonoApi:
         series = series.fillna(series.mean())
         return series
 
-    def get_any(self):
+    def get_any(self, resolution='D'):
         collection = choice(self.collections)
         property = choice(self.properties[collection])
-        return self.get_property(collection, property)
+        return self.get_property(collection, property, resolution)
 
     @staticmethod
     def fetch(url, encoding='utf-8'):
