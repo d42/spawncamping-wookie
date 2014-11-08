@@ -15,8 +15,12 @@ from webkimono.appexceptions import InvalidUsage, UnknownError
 user_kimonos = defaultdict(dict)
 
 
-@app.errorhandler(InvalidUsage, UnknownError)
+@app.errorhandler(InvalidUsage)
 def on_invalid(error):
+    return render_template('error.html', error=error)
+
+@app.errorhandler(UnknownError)
+def on_unknown(error):
     return render_template('error.html', error=error)
 
 @app.route('/')
