@@ -63,7 +63,6 @@ validateSubmit = function() {
     </fieldset>
 
 
-    <div class='row'>
         <fieldset>
             <legend>Resampling</legend>
 
@@ -78,23 +77,21 @@ validateSubmit = function() {
             <div class="form-group">
                 <label class="col-md-4 control-label">Resampling Methods</label>
                 <div class="col-md-4">
-
                     <label class="radio-inline" for="resampling0">
-                        <input type="radio" name="resamplingmethods" id="resampling0" value="1" checked="checked">
+                        <input type="radio" name="resamplingmethods" id="resampling0" value="0" checked="checked">
                         mean
                     </label>
 
                     <label class="radio-inline" for="resampling1">
-                        <input type="radio" name="resamplingmethods" id="resampling1" value="2">
+                        <input type="radio" name="resamplingmethods" id="resampling1" value="1">
                         max
                     </label>
 
                     <label class="radio-inline" for="resampling2">
-                        <input type="radio" name="resamplingmethods" id="resampling2" value="3">
+                        <input type="radio" name="resamplingmethods" id="resampling2" value="2">
                         sum
                     </label>
                 </div>
-            </div>
 
         </fieldset>
 
@@ -103,30 +100,22 @@ validateSubmit = function() {
 
                 <div class="form-group">
                     <label class="col-md-4 control-label">Missing values</label>
-                    <div class="col-md-4">
 
                         <label class="radio-inline" for="missing0">
-                            <input type="radio" name="resamplingmethods" id="missing0" value="1" checked="checked">
+                            <input type="radio" name="missingmethods" id="missing0" value="0" checked="checked">
                             mean
                         </label>
 
                         <label class="radio-inline" for="missing1">
-                            <input type="radio" name="resamplingmethods" id="missing1" value="2">
-                            max
+                            <input type="radio" name="missingmethods" id="missing1" value="1">
+                            0
                         </label>
 
                         <label class="radio-inline" for="missing2">
-                            <input type="radio" name="resamplingmethods" id="missing2" value="3">
-                            sum
+                            <input type="radio" name="missingmethods" id="missing2" value="2">
+                            ignore
                         </label>
 
-                    </div>
-                    <div class="col-xs-6 col-lg-4">
-                        <p>Missing Values </p>
-                        <span>
-                            <label> 0 <input type="radio" name="missingvalues" value="0" /></label>
-                            <label> Ignore <input type="radio" name="missingvalues" value="ignore" /></label>
-                        </span>
                     </div>
                 </div>
         </fieldset>

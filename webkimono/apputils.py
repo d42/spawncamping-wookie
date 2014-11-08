@@ -4,10 +4,11 @@ from functools import wraps
 from itertools import zip_longest
 from urllib import parse
 
-from flask import session, flash
+from flask import session, flash, url_for, redirect
 
 from webkimono.caching import cache
 from webkimono.kimono import KimonoApi
+from webkimono.appexceptions import InvalidUsage
 def assure_session(func):
 
     @wraps(func)
@@ -55,3 +56,29 @@ def kimonos_from_urls(urls):
         if final_url not in cache:
             cache.set(final_url, KimonoApi(final_url))
         yield cache.get(final_url)
+
+
+def read_select_form(form):
+    def read(value, table, error):
+        try:
+            return table[int(value)]
+        except:
+            InvalidUsage(error)
+
+    properties = [e[len('property_'):] for e in form.keys()
+                  if e.startswith('property_')]
+
+    if len(properties) != 2:
+        raise InvalidUsage("can haz 2 properties")
+
+
+    resolutions = ['D', '12H', 'H', '30Min', '15Min']
+    resamplings = ['mean', 'max', 'sum']
+    missings = ['mean', '0', 'ignore']
+
+    resolution = read(form["resolution"], resolutions, "resolution out of bound")
+    resampling = read(form["resamplingmethods"], resamplings, "resampling out of bound")
+    missing = read(form["missingmethods"], missings, "missing methods out of bound")
+
+    return properties, resolution, resampling, missing
+

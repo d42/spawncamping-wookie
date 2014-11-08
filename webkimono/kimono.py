@@ -15,6 +15,7 @@ class PropertyNotFoundException(Exception):
 class KimonoApi:
     def __init__(self, url):
         self.url = url
+
         self.content = self.fetch(self.url)
         self._read_meta(self.content)
 
@@ -25,17 +26,17 @@ class KimonoApi:
         self.properties = {c_name: list(content['results'][c_name][0].keys())
                            for c_name in self.collections}
 
-    def get_property(self, collection, property, resolution='D'):
+    def get_property(self, collection, property, resolution='D', how='mean'):
         if collection not in self.collections or property not in self.properties[collection]:
             raise PropertyNotFoundException()
 
         entries = self.content['results'][collection][0][property]
-        series = self.to_series(entries, resolution)
+        series = self.to_series(entries, resolution, how)
         series.name = '{}>{}'.format(collection, property)
-        series = series.fillna(series.mean())
+
         return series
 
-    def get_any(self, resolution='D'):
+    def get_any(self, resolution='D', how='mean'):
         collection = choice(self.collections)
         property = choice(self.properties[collection])
         return self.get_property(collection, property, resolution)
@@ -45,12 +46,13 @@ class KimonoApi:
         return json.loads(request.urlopen(url).read().decode(encoding))
 
     @staticmethod
-    def to_series(entries, resolution='D', time_format='%Y-%m-%dT%H:%M:%S.%fZ'):
+    def to_series(entries, resolution, how, time_format='%Y-%m-%dT%H:%M:%S.%fZ'):
         parsed_entries = sorted((datetime.strptime(e['d'], time_format), int(e['v']))
                                 for e in entries)
         times, values = zip(*parsed_entries)
-        return pandas.Series(values, times).resample(resolution)
-
+        series = pandas.Series(values, times).resample(resolution,
+                                                       how=how)
+        return series
 
 
 def trim(s1, s2):

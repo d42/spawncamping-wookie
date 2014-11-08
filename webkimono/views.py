@@ -5,13 +5,19 @@ from collections import defaultdict
 from webkimono import app
 from flask import render_template, request, session, flash, redirect, url_for
 
-from webkimono.apputils import assure_session, kimonos_from_urls, tabularize
+from webkimono.apputils import assure_session, kimonos_from_urls, tabularize, read_select_form
 from webkimono.kimono import KimonoApi, correlate, trim, PropertyNotFoundException
 from webkimono.caching import cache
 
+from webkimono.appexceptions import InvalidUsage, UnknownError
 
-user_kimonos = defaultdict(set)
 
+user_kimonos = defaultdict(dict)
+
+
+@app.errorhandler(InvalidUsage, UnknownError)
+def on_invalid(error):
+    return render_template('error.html', error=error)
 
 @app.route('/')
 def start():
@@ -26,9 +32,9 @@ def select():
     if request.method == 'POST':
         urls = (u for u in request.form['urls'].split('\n') if u.strip())
         url_kimonos = list(kimonos_from_urls(urls))
-        user_kimonos[s_id] |= set(url_kimonos)
+        user_kimonos[s_id].update({k.name: k for k in url_kimonos})
 
-    headers, collections, rows = tabularize(list(user_kimonos[s_id]))
+    headers, collections, rows = tabularize(list(user_kimonos[s_id].values()))
 
     return render_template('select.html',
                            rows=rows,
@@ -46,32 +52,33 @@ def discover():
 @assure_session
 def graph():
     s_id = session['session_id']
-    properties = [e[len('property_'):] for e in request.form.keys()
-                  if e.startswith('property_')]
 
-
-    if len(properties) != 2 or request.method == 'GET':
-        flash("can haz 2 properties")
-        return redirect(url_for('discover'))
-
-    resolutions = ['D', '12H', 'H', '30Min', '15Min']
-    resolution = resolutions[int(request.form['resolution'])]
-
-    def extract_kimonoapi(string):
+    def extract_kimonoapi(string, resolution, how, na):
         kname, cname, pname = string.split('.')
-        kimono = next(k for k in user_kimonos[s_id] if k.name == kname)
-        try:
-            return kimono.get_property(cname, pname, resolution)
-        except TypeError:
-            app.logger.error(kimono.content)
-    try:
-        herp, derp = map(extract_kimonoapi, properties)
-    except PropertyNotFoundException:
-        flash("Something went wrong! property not found!")
-        return start()
+        kimono = user_kimonos[s_id].get(kname, None)
+        if not kimono:
+            raise UnknownError("kimono extraction",
+                               payload=[kname, user_kimonos[s_id]])
 
+        try:
+            series = kimono.get_property(cname, pname, resolution)
+        except TypeError:
+            raise UnknownError("get_property",
+                               payload=[kimono.content, (cname, pname)])
+        if na != 'ignore':
+            series.fillna((series.mean() if na == 'mean' else 0), inplace=True)
+
+        return series
+
+    properties, res, how, na = read_select_form(request.form)
+
+    herp, derp = (extract_kimonoapi(p, res, how, na) for p in properties)
     herp, derp = trim(herp, derp)
     cor = correlate(herp, derp)
+    for series in [herp, derp]:
+        if na == 'ignore':
+            series.fillna(series.mean(), inplace=True)
+
     dates = [int(d.strftime('%s')) for d in herp.index]
 
     p1 = [{'x': d, 'y': v} for d, v in zip(dates, list(herp.values))]
