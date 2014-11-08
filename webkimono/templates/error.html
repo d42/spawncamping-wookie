@@ -9,7 +9,7 @@
 
     {% if error.payload %}
         <table>
-        {% for p in payload %}
+        {% for p in error.payload %}
             <tr><td>{{p}}</td></tr>
         {% endfor %}
         </table>
