@@ -54,7 +54,7 @@ validateSubmit = function() {
             <tr>
                 {% for column in row %}
                 <td>
-                    <label> <input type="checkbox" name="property_{{column|join('.')}}" onchange="propertySelection(this)"/>{{column|last}}</label>
+                    <label> <input type="checkbox" class="property" name="property_{{column|join('.')}}" onchange="propertySelection(this)"/>{{column|last}}</label>
                 </td>
                 {% endfor %}
             </tr>
@@ -123,10 +123,24 @@ validateSubmit = function() {
     </div>
 </form>
 
+
+<script>
+    p = document.getElementsByClassName("property")
+    for(i=0;i<p.length;i++) {
+        if(p.item(i).checked && selected_properties.length < 2) {
+            selected_properties.push(p.item(i));
+        }
+        else {
+            p.item(i).checked=false;
+        }
+    }
+</script>
+
 {% else %}
 <div class="jumbotron">
     It seems like you haven't connected any kimono APIs
     <a href="{{url_for('discover')}}" class="btn btn-primary" >Do it now</a>
 </div>
 {% endif %}
+
 {% endblock %}
